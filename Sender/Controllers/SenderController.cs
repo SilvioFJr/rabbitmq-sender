@@ -43,6 +43,32 @@ namespace Sender.Controllers
 
             return Ok("Order emitted");
         }
+        
+        [HttpPost("send-first-contact-message")]
+        public async Task<IActionResult> sendFirstContactMessage([FromBody] sendFirstContactWhatsappTemplateViewModel message)
+        {
+            if (
+                message == null || 
+                string.IsNullOrEmpty(message.PhoneNumberTo) || 
+                string.IsNullOrEmpty(message.Language) || 
+                string.IsNullOrEmpty(message.TemplateName)
+            )
+            {
+                return BadRequest("Dados do produto inválidos.");
+            }
+
+            var data = new TemplateMessage
+            {
+                TemplateName = message.TemplateName,
+                PhoneNumberTo = message.PhoneNumberTo,
+                Language = message.Language,
+                TemplateData = message.TemplateData,
+            };
+
+            await _rabbitMqService.SendMessage(data);
+
+            return Ok("Message sent");
+        }
     }
 }
 

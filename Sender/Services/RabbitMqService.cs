@@ -41,13 +41,13 @@ namespace Sender.Services
 
         }
 
-        public async Task SendMessage(Order order)
+        public async Task SendMessage<T>(T data)
         {
             try
             {
-                Console.WriteLine($"order: {order}");
+                Console.WriteLine($"data: {data}");
 
-                var message = JsonSerializer.Serialize(order);
+                var message = JsonSerializer.Serialize(data);
                 var body = Encoding.UTF8.GetBytes(message);
 
                 await _channel.BasicPublishAsync(
@@ -64,7 +64,7 @@ namespace Sender.Services
                 Console.WriteLine($"[SendMessage] Erro ao enviar mensagem: {ex.Message}");
                 throw;
             }
-        }
+        }       
     }
 }
 
