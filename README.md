@@ -5,7 +5,7 @@ Este projeto é uma implementação de envio de mensagens utilizando RabbitMQ em
 ## Funcionalidades
 
 - **Envio de mensagens para RabbitMQ**: O projeto permite enviar mensagens para uma fila do RabbitMQ.
-- **Configuração flexível**: Através de arquivos de configuração (`appsettings.json`), é possível configurar diferentes aspectos da conexão e envio de mensagens.
+- **Configuração flexível**: As configurações do RabbitMQ são definidas no arquivo `.env`, permitindo fácil personalização.
 - **Desempenho otimizado**: Utiliza técnicas assíncronas para garantir que o envio de mensagens seja eficiente e não bloqueie o fluxo da aplicação.
 
 ## Estrutura do Projeto
@@ -14,45 +14,91 @@ Este projeto é uma implementação de envio de mensagens utilizando RabbitMQ em
 - **Controllers**: Controladores que gerenciam a interação entre a aplicação e as filas do RabbitMQ.
 - **Models**: Modelos de dados utilizados para enviar e receber mensagens.
 - **Services**: Serviços para gerenciar a comunicação com RabbitMQ.
-- **appsettings.json**: Arquivo de configuração das variáveis de ambiente necessárias para a execução do projeto.
+- **.env**: Arquivo onde você deve definir as variáveis de configuração, como as credenciais do RabbitMQ.
 - **Program.cs**: Ponto de entrada principal da aplicação.
 - **Sender.csproj**: Arquivo do projeto C# que define as dependências e configurações do projeto.
 - **Sender.sln**: Arquivo de solução do projeto.
 
 ## Instalação
 
-1. Clone este repositório:
+1.  Clone este repositório:
 
     ```bash
     git clone https://github.com/seu-usuario/rabbitmq-sender.git
     ```
 
-2. Abra o projeto no Visual Studio ou outra IDE compatível com C#.
+2.  Abra o projeto no Visual Studio ou outra IDE compatível com C#.
 
-3. Restaure as dependências do projeto:
+3.  Restaure as dependências do projeto:
 
     ```bash
     dotnet restore
     ```
 
-4. Configure as variáveis de ambiente no arquivo `appsettings.json` com as credenciais do RabbitMQ.
+4.  Crie um arquivo `.env` na raiz do projeto e defina as seguintes variáveis de ambiente:
 
-## Uso
+    ```
+    ASPNETCORE_ENVIRONMENT=Development
+    HTTP_PORT=5000
+    HTTPS_PORT=5001
 
-Após a instalação e configuração, você pode usar o sender da seguinte maneira:
-
-1. Compile e inicie o serviço de envio de mensagens:
-
-    ```bash
-    dotnet run
+    RABBITMQ_HOST=seu_host_rabbitmq
+    RABBITMQ_USER=seu_usuario
+    RABBITMQ_PASSWORD=sua_senha
+    RABBITMQ_QUEUE=sua_fila
     ```
 
-2. As mensagens serão enviadas para a fila configurada no RabbitMQ, conforme as configurações no arquivo `appsettings.json`.
+        Nota: As variáveis acima são um exemplo, adicione ou modifique conforme necessário para o seu caso de uso.
 
-## Contribuindo
+## Testando os Endpoints
 
-Se você deseja contribuir para o projeto, sinta-se à vontade para enviar um pull request. Certifique-se de que seu código esteja bem testado e de que o projeto continue funcional após as modificações.
+Aqui estão dois exemplos de como testar os endpoints da API usando `curl`:
 
-## Licença
+### 1. Emissão de Ordem (`/api/sender/emit-order`)
 
-Este projeto está licenciado sob a [Licença MIT](LICENSE).
+Este endpoint permite emitir uma ordem para ser processada. Ele espera um corpo JSON com as informações do produto.
+
+```bash
+curl -X POST "http://localhost:5000/api/sender/emit-order" \
+-H "Content-Type: application/json" \
+-d '{
+    "name": "Produto Exemplo",
+    "value": 100.00,
+    "quantity": 2
+}'
+```
+### 2. Enviar mensagem de primeiro contato de pacientes para WhatsApp via plataforma Inflobip (`/api/sender/send-first-contact-message`)
+
+Este endpoint envia uma mensagem para o WhatsApp usando um template. Ele espera um corpo JSON com as informações do template, como o número de telefone, idioma e dados do template.
+
+```bash
+curl --location 'http://localhost:5000/api/sender/send-first-contact-message' \
+--header 'Content-Type: application/json' \
+--data '{
+    "phoneNumberTo": "5531999999999",
+    "language": "pt_BR",
+    "templateName": "first_contact_with_patients",
+    "templateData": {
+        "body": {
+            "additionalProp1": "Organização",
+            "additionalProp2": "Especialidade",
+            "additionalProp3": "Nome",
+            "additionalProp4": "Nome"
+        },
+        "buttons": {
+            "Button1": {
+                "type": "QUICK_REPLY",
+                "parameter": "AGENDAR"
+            },
+            "Button2": {
+                "type": "QUICK_REPLY",
+                "parameter": "NÃO SOU EU"
+            }
+        },
+        "header": {
+            "type": "TEXT",
+            "placeholder": "Organização Header"
+        }
+    }
+}'
+```
