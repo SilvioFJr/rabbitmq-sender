@@ -1,4 +1,5 @@
 using DotNetEnv;
+using DotNetEnv.Configuration;
 using Sender.Services;
 
 namespace Sender
@@ -11,11 +12,10 @@ namespace Sender
 
             var builder = WebApplication.CreateBuilder(args);
 
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "NOT_KNOWN";
+            builder.Configuration.AddDotNetEnv("./../.env");
+
             var HTTP_PORT = Environment.GetEnvironmentVariable("HTTP_PORT") ?? "9000";
             var HTTPS_PORT = Environment.GetEnvironmentVariable("HTTPS_PORT") ?? "9001";
-
-            builder.Environment.EnvironmentName = environment;
 
             builder.WebHost.UseUrls(
                 $"http://localhost:{HTTP_PORT}",
@@ -23,15 +23,8 @@ namespace Sender
             );
 
             Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
-
-            builder.Configuration
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true)
-                .AddEnvironmentVariables()
-                .AddCommandLine(args);
-
-            Console.WriteLine($"QueueName: {builder.Configuration["RabbitMQ:QueueName"]}");
-
+            Console.WriteLine($"QueueName: {builder.Configuration["RabbitMQ:ReferralQueueName"]}");
+           
             builder.Services.AddSingleton<IRabbitMqService, RabbitMqService>();
 
             builder.Services.AddControllers();
