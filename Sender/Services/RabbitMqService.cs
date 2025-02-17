@@ -18,7 +18,7 @@ namespace Sender.Services
         {
             _configuration = configuration;
 
-            _queueName = configuration["RabbitMQ:QueueName"] ?? "hello";
+            _queueName = configuration["RabbitMQ:ReferralQueueName"] ?? "hello";
 
 
             var factory = new ConnectionFactory()
