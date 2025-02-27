@@ -22,9 +22,9 @@ namespace Sender.Controllers
         public async Task<IActionResult> EmitOrder([FromBody] OrderViewModel order)
         {
             if (
-                order == null || 
-                string.IsNullOrEmpty(order.Name) || 
-                order.Value <= 0 || 
+                order == null ||
+                string.IsNullOrEmpty(order.Name) ||
+                order.Value <= 0 ||
                 order.Quantity <= 0
             )
             {
@@ -43,14 +43,14 @@ namespace Sender.Controllers
 
             return Ok("Order emitted");
         }
-        
+
         [HttpPost("send-first-contact-message")]
         public async Task<IActionResult> sendFirstContactMessage([FromBody] sendFirstContactWhatsappTemplateViewModel message)
         {
             if (
-                message == null || 
-                string.IsNullOrEmpty(message.PhoneNumberTo) || 
-                string.IsNullOrEmpty(message.Language) || 
+                message == null ||
+                string.IsNullOrEmpty(message.PhoneNumberTo) ||
+                string.IsNullOrEmpty(message.Language) ||
                 string.IsNullOrEmpty(message.TemplateName)
             )
             {
@@ -63,6 +63,26 @@ namespace Sender.Controllers
                 PhoneNumberTo = message.PhoneNumberTo,
                 Language = message.Language,
                 TemplateData = message.TemplateData,
+            };
+
+            await _rabbitMqService.SendMessage(data);
+
+            return Ok("Message sent");
+        }
+
+        [HttpPost("send-register-message")]
+        public async Task<IActionResult> sendRegisterMessage([FromBody] sendRegisterViewModel message)
+        {
+
+            var data = new RegisterMessage
+            {
+                UserId = message.UserId,
+                FirstName = message.FirstName,
+                LastName = message.LastName,
+                Gender = message.Gender,
+                Phone = message.Phone,
+                Email = message.Email,
+                CustomAttributes = message.CustomAttributes
             };
 
             await _rabbitMqService.SendMessage(data);
